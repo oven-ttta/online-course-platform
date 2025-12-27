@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+build/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+!.env.example
+!.env.production
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Testing
+coverage/
+
+# Prisma
+prisma/migrations/.migration_lock.toml
+
+# Uploads (local development)
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Vercel
+.vercel
+
+# Misc
+*.pem
