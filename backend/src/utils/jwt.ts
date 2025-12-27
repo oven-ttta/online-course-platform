@@ -1,4 +1,4 @@
-import jwt, { SignOptions } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 import { Role } from '@prisma/client';
 
 interface TokenPayload {
@@ -14,17 +14,13 @@ interface DecodedToken extends TokenPayload {
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'your-refresh-token-secret';
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '15m';
-const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
 
 export const generateAccessToken = (payload: TokenPayload): string => {
-  const options: SignOptions = { expiresIn: JWT_EXPIRES_IN as string };
-  return jwt.sign(payload, JWT_SECRET, options);
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: '15m' });
 };
 
 export const generateRefreshToken = (payload: TokenPayload): string => {
-  const options: SignOptions = { expiresIn: JWT_REFRESH_EXPIRES_IN as string };
-  return jwt.sign(payload, JWT_REFRESH_SECRET, options);
+  return jwt.sign(payload, JWT_REFRESH_SECRET, { expiresIn: '7d' });
 };
 
 export const verifyAccessToken = (token: string): DecodedToken => {
@@ -45,8 +41,7 @@ export const decodeToken = (token: string): DecodedToken | null => {
 
 // Calculate refresh token expiry date
 export const getRefreshTokenExpiry = (): Date => {
-  const days = parseInt(JWT_REFRESH_EXPIRES_IN.replace('d', '')) || 7;
   const expiry = new Date();
-  expiry.setDate(expiry.getDate() + days);
+  expiry.setDate(expiry.getDate() + 7);
   return expiry;
 };
