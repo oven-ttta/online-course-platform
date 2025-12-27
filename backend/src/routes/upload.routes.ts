@@ -5,7 +5,7 @@ import {
   uploadToMinioMiddleware,
   uploadMultipleToMinioMiddleware,
 } from '../middleware/upload.middleware';
-import { uploadFile, deleteFile, getPresignedUploadUrl } from '../utils/minio';
+import { deleteFile, getPresignedUploadUrl } from '../utils/minio';
 import { sendSuccess, sendError } from '../utils/response';
 
 const router = Router();
@@ -20,9 +20,9 @@ router.post(
   uploadToMinioMiddleware('images'),
   async (req: Request, res: Response) => {
     if (!req.body.uploadedFile) {
-      return sendError(res, 'No file uploaded', 400);
+      return sendError(res, 'NO_FILE', 'No file uploaded', 400);
     }
-    sendSuccess(res, req.body.uploadedFile, 'Image uploaded successfully');
+    sendSuccess(res, req.body.uploadedFile);
   }
 );
 
@@ -33,9 +33,9 @@ router.post(
   uploadToMinioMiddleware('videos'),
   async (req: Request, res: Response) => {
     if (!req.body.uploadedFile) {
-      return sendError(res, 'No file uploaded', 400);
+      return sendError(res, 'NO_FILE', 'No file uploaded', 400);
     }
-    sendSuccess(res, req.body.uploadedFile, 'Video uploaded successfully');
+    sendSuccess(res, req.body.uploadedFile);
   }
 );
 
@@ -46,9 +46,9 @@ router.post(
   uploadToMinioMiddleware('thumbnails'),
   async (req: Request, res: Response) => {
     if (!req.body.uploadedFile) {
-      return sendError(res, 'No file uploaded', 400);
+      return sendError(res, 'NO_FILE', 'No file uploaded', 400);
     }
-    sendSuccess(res, req.body.uploadedFile, 'Thumbnail uploaded successfully');
+    sendSuccess(res, req.body.uploadedFile);
   }
 );
 
@@ -59,9 +59,9 @@ router.post(
   uploadToMinioMiddleware('attachments'),
   async (req: Request, res: Response) => {
     if (!req.body.uploadedFile) {
-      return sendError(res, 'No file uploaded', 400);
+      return sendError(res, 'NO_FILE', 'No file uploaded', 400);
     }
-    sendSuccess(res, req.body.uploadedFile, 'Attachment uploaded successfully');
+    sendSuccess(res, req.body.uploadedFile);
   }
 );
 
@@ -72,9 +72,9 @@ router.post(
   uploadMultipleToMinioMiddleware('files'),
   async (req: Request, res: Response) => {
     if (!req.body.uploadedFiles || req.body.uploadedFiles.length === 0) {
-      return sendError(res, 'No files uploaded', 400);
+      return sendError(res, 'NO_FILE', 'No files uploaded', 400);
     }
-    sendSuccess(res, req.body.uploadedFiles, 'Files uploaded successfully');
+    sendSuccess(res, req.body.uploadedFiles);
   }
 );
 
@@ -84,7 +84,7 @@ router.post('/presigned-url', async (req: Request, res: Response, next: NextFunc
     const { fileName, folder = 'uploads' } = req.body;
 
     if (!fileName) {
-      return sendError(res, 'fileName is required', 400);
+      return sendError(res, 'VALIDATION_ERROR', 'fileName is required', 400);
     }
 
     const fullPath = `${folder}/${Date.now()}-${fileName}`;
@@ -93,7 +93,7 @@ router.post('/presigned-url', async (req: Request, res: Response, next: NextFunc
     sendSuccess(res, {
       uploadUrl,
       fileName: fullPath,
-    }, 'Presigned URL generated');
+    });
   } catch (error) {
     next(error);
   }
@@ -105,11 +105,11 @@ router.delete('/', async (req: Request, res: Response, next: NextFunction) => {
     const { fileName } = req.body;
 
     if (!fileName) {
-      return sendError(res, 'fileName is required', 400);
+      return sendError(res, 'VALIDATION_ERROR', 'fileName is required', 400);
     }
 
     await deleteFile(fileName);
-    sendSuccess(res, null, 'File deleted successfully');
+    sendSuccess(res, { deleted: true });
   } catch (error) {
     next(error);
   }

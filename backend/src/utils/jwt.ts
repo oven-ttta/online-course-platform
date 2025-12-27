@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jwt, { SignOptions } from 'jsonwebtoken';
 import { Role } from '@prisma/client';
 
 interface TokenPayload {
@@ -18,11 +18,13 @@ const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '15m';
 const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
 
 export const generateAccessToken = (payload: TokenPayload): string => {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+  const options: SignOptions = { expiresIn: JWT_EXPIRES_IN as string };
+  return jwt.sign(payload, JWT_SECRET, options);
 };
 
 export const generateRefreshToken = (payload: TokenPayload): string => {
-  return jwt.sign(payload, JWT_REFRESH_SECRET, { expiresIn: JWT_REFRESH_EXPIRES_IN });
+  const options: SignOptions = { expiresIn: JWT_REFRESH_EXPIRES_IN as string };
+  return jwt.sign(payload, JWT_REFRESH_SECRET, options);
 };
 
 export const verifyAccessToken = (token: string): DecodedToken => {
