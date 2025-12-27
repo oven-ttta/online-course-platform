@@ -31,7 +31,7 @@ services:
       DATABASE_URL: postgresql://postgres:postgres123@postgres:5432/online_course_db
       JWT_SECRET: super-secret-jwt-key-for-online-course-platform-2024
       JWT_REFRESH_SECRET: super-secret-refresh-key-for-online-course-platform-2024
-      FRONTEND_URL: https://frontend-rose-nu-28.vercel.app
+      FRONTEND_URL: https://frontend-rose-nu-28.vercel.app,https://course-api.ovenx.shop
       MINIO_ENDPOINT: minio.ovenx.shop
       MINIO_PORT: "443"
       MINIO_USE_SSL: "true"
