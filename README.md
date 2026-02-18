@@ -119,15 +119,6 @@ bun run dev
 
 ---
 
-## บัญชีผู้ใช้ทดสอบ (หลังจาก Seed)
-
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | admin@example.com | password123 |
-| Instructor | instructor@example.com | password123 |
-| Student | student@example.com | password123 |
-
----
 
 ## โครงสร้างโปรเจกต์
 

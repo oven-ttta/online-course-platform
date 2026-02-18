@@ -142,15 +142,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          {/* Demo accounts */}
-          <div className="mt-6 pt-6 border-t">
-            <p className="text-sm text-gray-500 text-center mb-3">บัญชีทดสอบ:</p>
-            <div className="text-xs text-gray-500 space-y-1">
-              <p>Admin: admin@example.com / password123</p>
-              <p>Instructor: instructor@example.com / password123</p>
-              <p>Student: student@example.com / password123</p>
-            </div>
-          </div>
+
         </div>
       </div>
     </div>
