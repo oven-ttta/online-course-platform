@@ -24,6 +24,7 @@ const createReviewValidation = [
 ];
 
 // Public routes
+router.get('/stats', courseController.getGlobalStats);
 router.get('/', courseController.getAllCourses);
 router.get('/featured', courseController.getFeaturedCourses);
 router.get('/id/:id', courseController.getCourseById);

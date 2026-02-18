@@ -498,6 +498,25 @@ class CourseService {
       },
     });
   }
+
+  async getGlobalStats() {
+    const [totalCourses, totalStudents, totalLessons, ratingStats] = await Promise.all([
+      prisma.course.count({ where: { status: CourseStatus.PUBLISHED } }),
+      prisma.user.count({ where: { role: 'STUDENT' } }),
+      prisma.lesson.count({ where: { isPublished: true } }),
+      prisma.review.aggregate({
+        _avg: { rating: true },
+        where: { isApproved: true },
+      }),
+    ]);
+
+    return {
+      totalCourses,
+      totalStudents,
+      totalLessons,
+      averageRating: ratingStats._avg.rating || 0,
+    };
+  }
 }
 
 export default new CourseService();

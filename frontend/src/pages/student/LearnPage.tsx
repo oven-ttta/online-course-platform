@@ -22,6 +22,7 @@ export default function LearnPage() {
   const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
   const playerRef = useRef<ReactPlayer>(null);
   const [hasSeeked, setHasSeeked] = useState(false);
 
@@ -73,13 +74,28 @@ export default function LearnPage() {
       });
       toast.success("บทเรียนเสร็จสมบูรณ์!");
 
+      // Update local state for immediate feedback
+      if (currentLesson) {
+        setCurrentLesson({
+          ...currentLesson,
+          progress: { ...(currentLesson.progress || {}), isCompleted: true },
+        } as any);
+      }
+
       // Refresh course data to update sidebar icons and progress
-      await loadCourse();
+      const refreshedCourseRes = await courseApi.getBySlug(courseSlug!);
+      const refreshedCourse = refreshedCourseRes.data.data;
+      setCourse(refreshedCourse);
+
+      // Check if course is now 100% complete
+      if (Number(refreshedCourse.enrollment?.progressPercent || 0) >= 100) {
+        setShowCompletionModal(true);
+      }
 
       // Find next lesson
-      if (course?.sections) {
+      if (refreshedCourse?.sections) {
         let foundCurrent = false;
-        for (const section of course.sections) {
+        for (const section of refreshedCourse.sections) {
           for (const lesson of section.lessons) {
             if (foundCurrent) {
               navigate(`/learn/${courseSlug}/${lesson.id}`);
@@ -156,7 +172,7 @@ export default function LearnPage() {
                 <div
                   className="bg-green-500 h-1.5 rounded-full transition-all duration-500"
                   style={{
-                    width: `${course?.enrollment?.progressPercent || 0}%`,
+                    width: `${Number(course?.enrollment?.progressPercent || 0)}%`,
                   }}
                 ></div>
               </div>
@@ -206,7 +222,7 @@ export default function LearnPage() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col">
+      <main className="relative flex-1 flex flex-col">
         {/* Toggle sidebar button */}
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -294,21 +310,67 @@ export default function LearnPage() {
 
           {/* Bottom Bar */}
           {currentLesson && (
-            <div className="bg-gray-800 text-white p-4 flex items-center justify-between">
+            <div className="bg-gray-800 text-white p-4 flex items-center justify-between border-t border-gray-700">
               <div>
-                <h3 className="font-medium">{currentLesson.title}</h3>
+                <h3 className="font-medium text-sm text-gray-300">
+                  บทเรียนปัจจุบัน
+                </h3>
+                <p className="font-bold">{currentLesson.title}</p>
               </div>
               <button
                 onClick={handleLessonComplete}
-                className="btn bg-green-600 hover:bg-green-700 text-white"
+                disabled={currentLesson.progress?.isCompleted}
+                className={`btn flex items-center gap-2 ${
+                  currentLesson.progress?.isCompleted
+                    ? "bg-gray-700 text-gray-400 cursor-not-allowed"
+                    : "bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-900/20"
+                }`}
               >
-                <CheckCircleIcon className="h-5 w-5 mr-2" />
-                ทำเครื่องหมายว่าเสร็จสิ้น
+                <CheckCircleIcon className="h-5 w-5" />
+                {currentLesson.progress?.isCompleted
+                  ? "เสร็จสิ้นแล้ว"
+                  : "ทำเครื่องหมายว่าเสร็จสิ้น"}
               </button>
             </div>
           )}
         </div>
       </main>
+
+      {/* Completion Modal */}
+      {showCompletionModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl max-w-md w-full p-8 text-center shadow-2xl transform transition-all animate-in fade-in zoom-in duration-300">
+            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <AcademicCapIcon className="h-12 w-12 text-green-600" />
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+              ยินดีด้วย! 🎉
+            </h2>
+            <p className="text-gray-600 mb-8 text-lg">
+              คุณได้เรียนจบหลักสูตร <br />
+              <span className="font-bold text-gray-900">
+                "{course?.title}"
+              </span>{" "}
+              <br />
+              เรียบร้อยแล้ว
+            </p>
+            <div className="space-y-3">
+              <button
+                onClick={() => navigate("/dashboard/my-courses")}
+                className="btn btn-primary w-full py-4 text-lg font-bold"
+              >
+                ไปยังหน้าคอร์สของฉัน
+              </button>
+              <button
+                onClick={() => setShowCompletionModal(false)}
+                className="text-gray-500 hover:text-gray-700 text-sm font-medium"
+              >
+                ดูเนื้อหารีวิวต่อ
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

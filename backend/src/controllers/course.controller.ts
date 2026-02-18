@@ -126,3 +126,12 @@ export const publishCourse = async (req: Request, res: Response, next: NextFunct
     next(error);
   }
 };
+
+export const getGlobalStats = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const stats = await courseService.getGlobalStats();
+    sendSuccess(res, stats);
+  } catch (error) {
+    next(error);
+  }
+};

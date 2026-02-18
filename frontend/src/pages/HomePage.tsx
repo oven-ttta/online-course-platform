@@ -1,18 +1,24 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import {
   AcademicCapIcon,
   PlayCircleIcon,
   UserGroupIcon,
   StarIcon,
-} from '@heroicons/react/24/outline';
-import { courseApi, categoryApi } from '../services/api';
-import { Course, Category } from '../types';
-import CourseCard from '../components/features/CourseCard';
+} from "@heroicons/react/24/outline";
+import { courseApi, categoryApi } from "../services/api";
+import { Course, Category } from "../types";
+import CourseCard from "../components/features/CourseCard";
 
 export default function HomePage() {
   const [featuredCourses, setFeaturedCourses] = useState<Course[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [globalStats, setGlobalStats] = useState({
+    totalCourses: 0,
+    totalStudents: 0,
+    totalLessons: 0,
+    averageRating: 0,
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -21,24 +27,42 @@ export default function HomePage() {
 
   const loadData = async () => {
     try {
-      const [coursesRes, categoriesRes] = await Promise.all([
+      const [coursesRes, categoriesRes, statsRes] = await Promise.all([
         courseApi.getFeatured(6),
         categoryApi.getAll(),
+        courseApi.getStats(),
       ]);
       setFeaturedCourses(coursesRes.data.data);
       setCategories(categoriesRes.data.data);
+      setGlobalStats(statsRes.data.data);
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error("Error loading data:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const stats = [
-    { icon: AcademicCapIcon, value: '1,000+', label: 'คอร์สเรียน' },
-    { icon: UserGroupIcon, value: '50,000+', label: 'นักเรียน' },
-    { icon: PlayCircleIcon, value: '10,000+', label: 'บทเรียน' },
-    { icon: StarIcon, value: '4.8', label: 'คะแนนเฉลี่ย' },
+    {
+      icon: AcademicCapIcon,
+      value: `${globalStats.totalCourses.toLocaleString()}+`,
+      label: "คอร์สเรียน",
+    },
+    {
+      icon: UserGroupIcon,
+      value: `${globalStats.totalStudents.toLocaleString()}+`,
+      label: "นักเรียน",
+    },
+    {
+      icon: PlayCircleIcon,
+      value: `${globalStats.totalLessons.toLocaleString()}+`,
+      label: "บทเรียน",
+    },
+    {
+      icon: StarIcon,
+      value: globalStats.averageRating.toFixed(1),
+      label: "คะแนนเฉลี่ย",
+    },
   ];
 
   return (
@@ -57,10 +81,16 @@ export default function HomePage() {
               เรียนได้ทุกที่ทุกเวลา พร้อมใบประกาศนียบัตรเมื่อเรียนจบ
             </p>
             <div className="flex flex-wrap gap-4">
-              <Link to="/courses" className="btn bg-white text-primary-600 hover:bg-gray-100 px-6 py-3">
+              <Link
+                to="/courses"
+                className="btn bg-white text-primary-600 hover:bg-gray-100 px-6 py-3"
+              >
                 เริ่มเรียนเลย
               </Link>
-              <Link to="/register" className="btn border-2 border-white text-white hover:bg-white hover:text-primary-600 px-6 py-3">
+              <Link
+                to="/register"
+                className="btn border-2 border-white text-white hover:bg-white hover:text-primary-600 px-6 py-3"
+              >
                 สมัครฟรี
               </Link>
             </div>
@@ -75,7 +105,9 @@ export default function HomePage() {
             {stats.map((stat, index) => (
               <div key={index} className="text-center">
                 <stat.icon className="h-10 w-10 mx-auto text-primary-600 mb-3" />
-                <div className="text-3xl font-bold text-gray-900">{stat.value}</div>
+                <div className="text-3xl font-bold text-gray-900">
+                  {stat.value}
+                </div>
                 <div className="text-gray-500">{stat.label}</div>
               </div>
             ))}
@@ -90,9 +122,7 @@ export default function HomePage() {
             <h2 className="text-3xl font-bold text-gray-900 mb-4">
               หมวดหมู่ยอดนิยม
             </h2>
-            <p className="text-gray-600">
-              เลือกเรียนในสาขาที่คุณสนใจ
-            </p>
+            <p className="text-gray-600">เลือกเรียนในสาขาที่คุณสนใจ</p>
           </div>
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -121,7 +151,9 @@ export default function HomePage() {
           <div className="flex justify-between items-center mb-8">
             <div>
               <h2 className="text-3xl font-bold text-gray-900">คอร์สแนะนำ</h2>
-              <p className="text-gray-600 mt-2">คอร์สยอดนิยมที่คัดสรรมาเพื่อคุณ</p>
+              <p className="text-gray-600 mt-2">
+                คอร์สยอดนิยมที่คัดสรรมาเพื่อคุณ
+              </p>
             </div>
             <Link
               to="/courses"
@@ -134,7 +166,10 @@ export default function HomePage() {
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="bg-white rounded-xl shadow animate-pulse">
+                <div
+                  key={i}
+                  className="bg-white rounded-xl shadow animate-pulse"
+                >
                   <div className="h-48 bg-gray-200 rounded-t-xl" />
                   <div className="p-5 space-y-3">
                     <div className="h-4 bg-gray-200 rounded w-3/4" />
@@ -161,8 +196,8 @@ export default function HomePage() {
             พร้อมที่จะเริ่มเรียนหรือยัง?
           </h2>
           <p className="text-primary-100 mb-8 max-w-2xl mx-auto">
-            เข้าร่วมกับนักเรียนกว่า 50,000 คนที่เลือกเรียนกับเรา
-            สมัครวันนี้และเริ่มต้นเส้นทางการเรียนรู้ของคุณ
+            เข้าร่วมกับนักเรียนกว่า {globalStats.totalStudents.toLocaleString()}{" "}
+            คนที่เลือกเรียนกับเรา สมัครวันนี้และเริ่มต้นเส้นทางการเรียนรู้ของคุณ
           </p>
           <Link
             to="/register"

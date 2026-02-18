@@ -89,6 +89,7 @@ export const courseApi = {
   }) => api.get('/courses', { params }),
   getFeatured: (limit?: number) =>
     api.get('/courses/featured', { params: { limit } }),
+  getStats: () => api.get('/courses/stats'),
   getBySlug: (slug: string) =>
     api.get(`/courses/${slug}`),
   getById: (id: string) =>

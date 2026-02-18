@@ -9,7 +9,7 @@ class WalletService {
             where: { id: userId },
             select: { balance: true },
         });
-        return Number(user?.balance || 0);
+        return Number((user as any)?.balance || 0);
     }
 
     async getTransactions(userId: string) {
@@ -36,14 +36,14 @@ class WalletService {
 
             const price = Number(course.discountPrice || course.price);
 
-            if (Number(user.balance) < price) {
+            if (Number((user as any).balance) < price) {
                 throw { statusCode: 400, code: 'INSUFFICIENT_BALANCE', message: 'ยอดเงินไม่เพียงพอ' };
             }
 
             await tx.user.update({
                 where: { id: userId },
                 data: {
-                    balance: Number(user.balance) - price
+                    balance: Number((user as any).balance) - price
                 },
             });
 
