@@ -4,13 +4,16 @@ import {
   CreditCardIcon,
   BanknotesIcon,
   ArrowPathIcon,
+  GiftIcon,
 } from "@heroicons/react/24/outline";
 import toast from "react-hot-toast";
 
 export default function DepositPage() {
   const [balance, setBalance] = useState<number>(0);
   const [amount, setAmount] = useState<string>("");
+  const [voucherUrl, setVoucherUrl] = useState<string>("");
   const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState<"demo" | "voucher">("voucher");
   const [transactions, setTransactions] = useState<any[]>([]);
 
   useEffect(() => {
@@ -51,6 +54,36 @@ export default function DepositPage() {
     }
   };
 
+  const handleRedeemVoucher = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!voucherUrl) {
+      toast.error("กรุณาระบุลิงก์ซองอั่งเปา");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await walletApi.redeem(voucherUrl);
+      toast.success("แลกคูปองสำเร็จ! ยอดเงินถูกเพิ่มเข้าไปในกระเป๋าแล้ว");
+      setVoucherUrl("");
+      loadWalletData();
+    } catch (error: any) {
+      const errorMsg =
+        error.response?.data?.error?.message || "เกิดข้อผิดพลาดในการแลกคูปอง";
+      const errorCode = error.response?.data?.error?.code;
+
+      if (errorCode === "VOUCHER_OUT_OF_STOCK") {
+        toast.error("คูปองนี้ถูกใช้ไปแล้ว");
+      } else if (errorCode === "VOUCHER_NOT_FOUND") {
+        toast.error("ไม่พบคูปองนี้ กรุณาตรวจสอบลิงก์อีกครั้ง");
+      } else {
+        toast.error(errorMsg);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto py-8 px-4">
       <h1 className="text-2xl font-bold text-gray-900 mb-8">
@@ -72,55 +105,113 @@ export default function DepositPage() {
           </div>
         </div>
 
-        {/* Deposit Form */}
-        <div className="md:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <BanknotesIcon className="h-5 w-5 text-primary-600" />
-            เติมเงินเข้าระบบ
-          </h3>
-          <form onSubmit={handleDeposit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                จำนวนเงินที่ต้องการเติม (บาท)
-              </label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                  ฿
-                </span>
-                <input
-                  type="number"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  placeholder="ระบุจำนวนเงิน เช่น 500"
-                  className="input pl-8"
-                  required
-                />
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {[100, 500, 1000, 2000].map((val) => (
-                <button
-                  key={val}
-                  type="button"
-                  onClick={() => setAmount(val.toString())}
-                  className="px-4 py-1.5 text-sm font-medium rounded-full bg-gray-50 text-gray-600 hover:bg-primary-50 hover:text-primary-600 border border-gray-200 hover:border-primary-200 transition-colors"
-                >
-                  +฿{val}
-                </button>
-              ))}
-            </div>
+        {/* Deposit Form Area */}
+        <div className="md:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          {/* Tabs */}
+          <div className="flex border-b border-gray-100">
             <button
-              type="submit"
-              disabled={loading}
-              className="btn btn-primary w-full py-3 flex items-center justify-center gap-2"
+              onClick={() => setActiveTab("voucher")}
+              className={`flex-1 py-4 text-sm font-medium flex items-center justify-center gap-2 transition-colors ${
+                activeTab === "voucher"
+                  ? "bg-primary-50 text-primary-600 border-b-2 border-primary-600"
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+              }`}
             >
-              {loading ? (
-                <ArrowPathIcon className="h-5 w-5 animate-spin" />
-              ) : (
-                "ยืนยันการเติมเงิน (Demo)"
-              )}
+              <GiftIcon className="h-5 w-5" />
+              TrueMoney Voucher
             </button>
-          </form>
+            <button
+              onClick={() => setActiveTab("demo")}
+              className={`flex-1 py-4 text-sm font-medium flex items-center justify-center gap-2 transition-colors ${
+                activeTab === "demo"
+                  ? "bg-primary-50 text-primary-600 border-b-2 border-primary-600"
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              <BanknotesIcon className="h-5 w-5" />
+              Demo (เติมเงินจำลอง)
+            </button>
+          </div>
+
+          <div className="p-6">
+            {activeTab === "voucher" ? (
+              <form onSubmit={handleRedeemVoucher} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    ลิงก์ซองอั่งเปา TrueMoney Wallet
+                  </label>
+                  <input
+                    type="url"
+                    value={voucherUrl}
+                    onChange={(e) => setVoucherUrl(e.target.value)}
+                    placeholder="https://gift.truemoney.com/campaign/?v=..."
+                    className="input"
+                    required
+                  />
+                  <p className="mt-2 text-xs text-gray-500 leading-relaxed">
+                    * วิธีใช้งาน: เปิดแอป TrueMoney &gt; ส่งซองอั่งเปา &gt;
+                    เลือกประเภทแบบ "สุ่ม" หรือ "แบ่งเท่ากัน" ก็ได้ &gt;
+                    คัดลอกลิงก์มาวางที่นี่
+                  </p>
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="btn btn-primary w-full py-3 flex items-center justify-center gap-2"
+                >
+                  {loading ? (
+                    <ArrowPathIcon className="h-5 w-5 animate-spin" />
+                  ) : (
+                    "ยืนยันการรับเงินจากซอง"
+                  )}
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleDeposit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    จำนวนเงินที่ต้องการเติม (บาท)
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                      ฿
+                    </span>
+                    <input
+                      type="number"
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      placeholder="ระบุจำนวนเงิน เช่น 500"
+                      className="input pl-8"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {[100, 500, 1000, 2000].map((val) => (
+                    <button
+                      key={val}
+                      type="button"
+                      onClick={() => setAmount(val.toString())}
+                      className="px-4 py-1.5 text-sm font-medium rounded-full bg-gray-50 text-gray-600 hover:bg-primary-50 hover:text-primary-600 border border-gray-200 hover:border-primary-200 transition-colors"
+                    >
+                      +฿{val}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="btn btn-primary w-full py-3 flex items-center justify-center gap-2"
+                >
+                  {loading ? (
+                    <ArrowPathIcon className="h-5 w-5 animate-spin" />
+                  ) : (
+                    "ยืนยันการเติมเงิน (Demo)"
+                  )}
+                </button>
+              </form>
+            )}
+          </div>
         </div>
       </div>
 

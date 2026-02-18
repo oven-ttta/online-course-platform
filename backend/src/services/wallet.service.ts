@@ -1,5 +1,6 @@
 import prisma from '../utils/prisma';
 import { TransactionType, TransactionStatus } from '@prisma/client';
+import redeemvouchers from "@prakrit_m/tmn-voucher";
 
 class WalletService {
     async deposit(userId: string, amount: number, provider: string = 'DEMO') {
@@ -97,6 +98,52 @@ class WalletService {
 
             return { transaction, payment };
         });
+    }
+
+    async redeemVoucher(userId: string, voucherUrl: string) {
+        const phoneNumber = process.env.TRUEMONEY_PHONE || '';
+        if (!phoneNumber) {
+            throw { statusCode: 500, message: 'TrueMoney configuration is missing' };
+        }
+
+        try {
+            const response = await redeemvouchers(phoneNumber, voucherUrl);
+
+            if (!response.success) {
+                throw { statusCode: 400, code: response.code, message: response.message };
+            }
+
+            // Amount from library is in satang (unit of 0.01 THB)
+            const amountInBaht = response.amount / 100;
+
+            return prisma.$transaction(async (tx) => {
+                const transaction = await tx.walletTransaction.create({
+                    data: {
+                        userId,
+                        amount: amountInBaht,
+                        type: TransactionType.DEPOSIT,
+                        status: TransactionStatus.SUCCESS,
+                        provider: 'TMN_VOUCHER',
+                        description: `เติมเงินผ่าน TrueMoney Voucher: ${amountInBaht} บาท`,
+                        referenceId: `TMN-${Date.now()}`,
+                    },
+                });
+
+                await tx.user.update({
+                    where: { id: userId },
+                    data: {
+                        balance: {
+                            increment: amountInBaht,
+                        },
+                    },
+                });
+
+                return transaction;
+            });
+        } catch (error: any) {
+            if (error.statusCode) throw error;
+            throw { statusCode: 500, message: error.message || 'Error redeeming voucher' };
+        }
     }
 }
 

@@ -271,4 +271,5 @@ export const walletApi = {
   deposit: (amount: number) => api.post('/wallet/deposit', { amount }),
   getTransactions: () => api.get('/wallet/transactions'),
   purchase: (courseId: string) => api.post(`/wallet/purchase/${courseId}`),
+  redeem: (voucherUrl: string) => api.post('/wallet/redeem', { voucherUrl }),
 };

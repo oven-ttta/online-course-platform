@@ -46,3 +46,17 @@ export const purchaseCourse = async (req: Request, res: Response, next: NextFunc
         next(error);
     }
 };
+
+export const redeemVoucher = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user!.userId;
+        const { voucherUrl } = req.body;
+        if (!voucherUrl) {
+            return res.status(400).json({ error: 'Voucher URL is required' });
+        }
+        const transaction = await walletService.redeemVoucher(userId, voucherUrl);
+        sendSuccess(res, transaction);
+    } catch (error) {
+        next(error);
+    }
+};
