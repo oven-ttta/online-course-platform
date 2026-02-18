@@ -118,9 +118,11 @@ export default function AdminReportsPage() {
                 />
                 <YAxis tick={{ fontSize: 12 }} />
                 <Tooltip
-                  formatter={(val: any) => `฿${Number(val).toLocaleString()}`}
+                  formatter={(val: any) =>
+                    `฿${Number(val || 0).toLocaleString()}`
+                  }
                   labelFormatter={(val) =>
-                    new Date(val).toLocaleDateString("th-TH", {
+                    new Date(val as string).toLocaleDateString("th-TH", {
                       month: "long",
                       year: "numeric",
                     })
