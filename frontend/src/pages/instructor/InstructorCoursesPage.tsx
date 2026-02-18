@@ -5,6 +5,7 @@ import {
   PencilIcon,
   TrashIcon,
   EyeIcon,
+  VideoCameraIcon,
 } from "@heroicons/react/24/outline";
 import { instructorApi, courseApi } from "../../services/api";
 import toast from "react-hot-toast";
@@ -178,11 +179,18 @@ export default function InstructorCoursesPage() {
                       ดูตัวอย่าง
                     </Link>
                     <Link
+                      to={`/instructor/courses/curriculum/${course.id}`}
+                      className="btn btn-secondary text-sm py-1"
+                    >
+                      <VideoCameraIcon className="h-4 w-4 mr-1" />
+                      เนื้อหาวิดีโอ/บทเรียน
+                    </Link>
+                    <Link
                       to={`/instructor/courses/edit/${course.id}`}
                       className="btn btn-secondary text-sm py-1"
                     >
                       <PencilIcon className="h-4 w-4 mr-1" />
-                      แก้ไข
+                      แก้ไขข้อมูล
                     </Link>
                     {course.status === "DRAFT" && (
                       <button

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   PlayCircleIcon,
   BookOpenIcon,
@@ -7,12 +7,12 @@ import {
   CheckCircleIcon,
   LockClosedIcon,
   ChevronDownIcon,
-} from '@heroicons/react/24/solid';
-import { Disclosure } from '@headlessui/react';
-import toast from 'react-hot-toast';
-import { courseApi } from '../services/api';
-import { useAuth } from '../contexts/AuthContext';
-import { Course, Review } from '../types';
+} from "@heroicons/react/24/solid";
+import { Disclosure } from "@headlessui/react";
+import toast from "react-hot-toast";
+import { courseApi, walletApi } from "../services/api";
+import { useAuth } from "../contexts/AuthContext";
+import { Course, Review } from "../types";
 
 export default function CourseDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -38,8 +38,8 @@ export default function CourseDetailPage() {
       setCourse(courseRes.data.data);
       setReviews(reviewsRes.data.data);
     } catch (error) {
-      console.error('Error loading course:', error);
-      navigate('/courses');
+      console.error("Error loading course:", error);
+      navigate("/courses");
     } finally {
       setLoading(false);
     }
@@ -47,22 +47,45 @@ export default function CourseDetailPage() {
 
   const handleEnroll = async () => {
     if (!isAuthenticated) {
-      navigate('/login');
+      navigate("/login");
       return;
     }
 
-    if (!hasRole(['STUDENT'])) {
-      toast.error('เฉพาะนักเรียนเท่านั้นที่สามารถลงทะเบียนได้');
+    if (!hasRole(["STUDENT"])) {
+      toast.error("เฉพาะนักเรียนเท่านั้นที่สามารถลงทะเบียนได้");
       return;
     }
 
     setEnrolling(true);
     try {
-      await courseApi.enroll(course!.id);
-      toast.success('ลงทะเบียนสำเร็จ');
-      navigate(`/learn/${course!.slug}`);
+      const price = Number(course?.discountPrice || course?.price || 0);
+
+      if (price > 0) {
+        // Handle paid course via Wallet
+        if (
+          window.confirm(
+            `คุณแน่ใจหรือไม่ที่จะซื้อคอร์สนี้ในราคา ฿${price.toLocaleString()}?`,
+          )
+        ) {
+          const purchaseRes = await walletApi.purchase(course!.id);
+          const paymentId = purchaseRes.data.data.payment.id;
+          await courseApi.enroll(course!.id, { paymentId });
+          toast.success("เย้! ซื้อคอร์สเสร็จเรียบร้อยแล้ว");
+          navigate(`/learn/${course!.slug}`);
+        }
+      } else {
+        // Free course
+        await courseApi.enroll(course!.id);
+        toast.success("ลงทะเบียนสำเร็จ");
+        navigate(`/learn/${course!.slug}`);
+      }
     } catch (error: any) {
-      toast.error(error.response?.data?.error?.message || 'เกิดข้อผิดพลาด');
+      if (error.response?.data?.error?.code === "INSUFFICIENT_BALANCE") {
+        toast.error("ยอดเงินไม่เพียงพอ กรุณาเติมเงินก่อนดำเนินการ");
+        navigate("/dashboard/wallet");
+      } else {
+        toast.error(error.response?.data?.error?.message || "เกิดข้อผิดพลาด");
+      }
     } finally {
       setEnrolling(false);
     }
@@ -99,8 +122,12 @@ export default function CourseDetailPage() {
               <div className="text-primary-400 text-sm font-medium mb-2">
                 {course.category.name}
               </div>
-              <h1 className="text-3xl lg:text-4xl font-bold mb-4">{course.title}</h1>
-              <p className="text-gray-300 mb-6">{course.shortDescription || course.description.slice(0, 200)}</p>
+              <h1 className="text-3xl lg:text-4xl font-bold mb-4">
+                {course.title}
+              </h1>
+              <p className="text-gray-300 mb-6">
+                {course.shortDescription || course.description.slice(0, 200)}
+              </p>
 
               {/* Stats */}
               <div className="flex flex-wrap items-center gap-4 mb-6">
@@ -173,7 +200,9 @@ export default function CourseDetailPage() {
                         ฿{course.price.toLocaleString()}
                       </span>
                     ) : (
-                      <span className="text-3xl font-bold text-green-600">ฟรี</span>
+                      <span className="text-3xl font-bold text-green-600">
+                        ฟรี
+                      </span>
                     )}
                   </div>
 
@@ -191,7 +220,7 @@ export default function CourseDetailPage() {
                       disabled={enrolling}
                       className="w-full btn btn-primary py-3 text-lg disabled:opacity-50"
                     >
-                      {enrolling ? 'กำลังลงทะเบียน...' : 'ลงทะเบียนเรียน'}
+                      {enrolling ? "กำลังลงทะเบียน..." : "ลงทะเบียนเรียน"}
                     </button>
                   )}
 
@@ -199,20 +228,24 @@ export default function CourseDetailPage() {
                   <div className="mt-6 space-y-3 text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-500">ระยะเวลา</span>
-                      <span className="font-medium">{formatDuration(course.totalDuration)}</span>
+                      <span className="font-medium">
+                        {formatDuration(course.totalDuration)}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500">บทเรียน</span>
-                      <span className="font-medium">{course.totalLessons} บท</span>
+                      <span className="font-medium">
+                        {course.totalLessons} บท
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500">ระดับ</span>
                       <span className="font-medium">
-                        {course.level === 'BEGINNER'
-                          ? 'เริ่มต้น'
-                          : course.level === 'INTERMEDIATE'
-                          ? 'ปานกลาง'
-                          : 'ขั้นสูง'}
+                        {course.level === "BEGINNER"
+                          ? "เริ่มต้น"
+                          : course.level === "INTERMEDIATE"
+                            ? "ปานกลาง"
+                            : "ขั้นสูง"}
                       </span>
                     </div>
                     <div className="flex justify-between">
@@ -234,7 +267,9 @@ export default function CourseDetailPage() {
             {/* What you'll learn */}
             {course.whatYouLearn && course.whatYouLearn.length > 0 && (
               <div className="bg-white rounded-xl shadow p-6 mb-8">
-                <h2 className="text-xl font-bold mb-4">สิ่งที่คุณจะได้เรียนรู้</h2>
+                <h2 className="text-xl font-bold mb-4">
+                  สิ่งที่คุณจะได้เรียนรู้
+                </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {course.whatYouLearn.map((item, index) => (
                     <div key={index} className="flex items-start">
@@ -263,7 +298,7 @@ export default function CourseDetailPage() {
                               </span>
                               <ChevronDownIcon
                                 className={`h-5 w-5 text-gray-500 transition-transform ${
-                                  open ? 'rotate-180' : ''
+                                  open ? "rotate-180" : ""
                                 }`}
                               />
                             </div>
@@ -271,16 +306,21 @@ export default function CourseDetailPage() {
                           <Disclosure.Panel className="px-4 pt-2 pb-4">
                             <ul className="space-y-2">
                               {section.lessons.map((lesson) => (
-                                <li key={lesson.id} className="flex items-center justify-between py-2 border-b last:border-0">
+                                <li
+                                  key={lesson.id}
+                                  className="flex items-center justify-between py-2 border-b last:border-0"
+                                >
                                   <div className="flex items-center">
-                                    {lesson.type === 'VIDEO' ? (
+                                    {lesson.type === "VIDEO" ? (
                                       <PlayCircleIcon className="h-5 w-5 text-gray-400 mr-3" />
-                                    ) : lesson.type === 'QUIZ' ? (
+                                    ) : lesson.type === "QUIZ" ? (
                                       <BookOpenIcon className="h-5 w-5 text-gray-400 mr-3" />
                                     ) : (
                                       <BookOpenIcon className="h-5 w-5 text-gray-400 mr-3" />
                                     )}
-                                    <span className="text-gray-700">{lesson.title}</span>
+                                    <span className="text-gray-700">
+                                      {lesson.title}
+                                    </span>
                                     {lesson.isFree && (
                                       <span className="ml-2 text-xs bg-green-100 text-green-600 px-2 py-0.5 rounded">
                                         ฟรี
@@ -289,7 +329,10 @@ export default function CourseDetailPage() {
                                   </div>
                                   <div className="flex items-center text-sm text-gray-500">
                                     {lesson.videoDuration && (
-                                      <span>{Math.floor(lesson.videoDuration / 60)} นาที</span>
+                                      <span>
+                                        {Math.floor(lesson.videoDuration / 60)}{" "}
+                                        นาที
+                                      </span>
                                     )}
                                     {!course.isEnrolled && !lesson.isFree && (
                                       <LockClosedIcon className="h-4 w-4 ml-2" />
@@ -336,7 +379,10 @@ export default function CourseDetailPage() {
                 <h2 className="text-xl font-bold mb-4">รีวิวจากผู้เรียน</h2>
                 <div className="space-y-4">
                   {reviews.map((review) => (
-                    <div key={review.id} className="border-b pb-4 last:border-0">
+                    <div
+                      key={review.id}
+                      className="border-b pb-4 last:border-0"
+                    >
                       <div className="flex items-start">
                         <div className="h-10 w-10 bg-gray-200 rounded-full flex items-center justify-center flex-shrink-0">
                           {review.user.avatarUrl ? (
@@ -361,14 +407,18 @@ export default function CourseDetailPage() {
                                 <StarIcon
                                   key={i}
                                   className={`h-4 w-4 ${
-                                    i < review.rating ? 'text-yellow-400' : 'text-gray-200'
+                                    i < review.rating
+                                      ? "text-yellow-400"
+                                      : "text-gray-200"
                                   }`}
                                 />
                               ))}
                             </div>
                           </div>
                           {review.comment && (
-                            <p className="text-gray-600 mt-1">{review.comment}</p>
+                            <p className="text-gray-600 mt-1">
+                              {review.comment}
+                            </p>
                           )}
                         </div>
                       </div>

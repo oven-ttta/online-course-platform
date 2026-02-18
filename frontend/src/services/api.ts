@@ -101,8 +101,8 @@ export const courseApi = {
     api.delete(`/courses/${id}`),
   publish: (id: string) =>
     api.put(`/courses/${id}/publish`),
-  enroll: (courseId: string) =>
-    api.post(`/courses/${courseId}/enroll`),
+  enroll: (courseId: string, data?: object) =>
+    api.post(`/courses/${courseId}/enroll`, data),
   getReviews: (courseId: string, params?: { page?: number; limit?: number }) =>
     api.get(`/courses/${courseId}/reviews`, { params }),
   createReview: (courseId: string, data: { rating: number; comment?: string }) =>
@@ -264,4 +264,11 @@ export const adminApi = {
     api.put(`/users/${userId}/role`, { role }),
   getRevenueReport: (params?: { startDate?: string; endDate?: string }) =>
     api.get('/admin/reports/revenue', { params }),
+};
+
+export const walletApi = {
+  getBalance: () => api.get('/wallet/balance'),
+  deposit: (amount: number) => api.post('/wallet/deposit', { amount }),
+  getTransactions: () => api.get('/wallet/transactions'),
+  purchase: (courseId: string) => api.post(`/wallet/purchase/${courseId}`),
 };

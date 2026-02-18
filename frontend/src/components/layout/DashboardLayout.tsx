@@ -12,6 +12,7 @@ import {
   XMarkIcon,
   PlusIcon,
   ClipboardDocumentListIcon,
+  BanknotesIcon,
 } from "@heroicons/react/24/outline";
 import { useAuth } from "../../contexts/AuthContext";
 import Navbar from "./Navbar";
@@ -30,6 +31,7 @@ const studentNavigation: NavItem[] = [
     href: "/dashboard/wishlist",
     icon: AcademicCapIcon,
   },
+  { name: "กระเป๋าเงิน", href: "/dashboard/wallet", icon: BanknotesIcon },
   { name: "ตั้งค่าโปรไฟล์", href: "/dashboard/profile", icon: Cog6ToothIcon },
 ];
 

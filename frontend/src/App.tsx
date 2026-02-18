@@ -14,6 +14,7 @@ import RegisterPage from "./pages/RegisterPage";
 import StudentDashboard from "./pages/student/StudentDashboard";
 import MyCoursesPage from "./pages/student/MyCoursesPage";
 import LearnPage from "./pages/student/LearnPage";
+import DepositPage from "./pages/student/DepositPage";
 import InstructorDashboard from "./pages/instructor/InstructorDashboard";
 import InstructorCoursesPage from "./pages/instructor/InstructorCoursesPage";
 import CreateCoursePage from "./pages/instructor/CreateCoursePage";
@@ -94,6 +95,7 @@ function App() {
         <Route path="my-courses" element={<MyCoursesPage />} />
         <Route path="wishlist" element={<WishlistPage />} />
         <Route path="profile" element={<ProfilePage />} />
+        <Route path="wallet" element={<DepositPage />} />
       </Route>
 
       {/* Learning Route */}

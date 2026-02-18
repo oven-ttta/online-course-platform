@@ -19,6 +19,7 @@ import instructorRoutes from './routes/instructor.routes';
 import uploadRoutes from './routes/upload.routes';
 import wishlistRoutes from './routes/wishlist.routes';
 import contactRoutes from './routes/contact.routes';
+import walletRoutes from './routes/wallet.routes';
 
 // Import middleware
 import { errorHandler } from './middleware/error.middleware';
@@ -73,6 +74,7 @@ app.use('/api/instructor', instructorRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/wallet', walletRoutes);
 
 // Error handler
 app.use(errorHandler);

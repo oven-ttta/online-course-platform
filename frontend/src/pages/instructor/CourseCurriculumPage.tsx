@@ -41,8 +41,12 @@ export default function CourseCurriculumPage() {
 
   const loadCourseData = async () => {
     try {
-      // Use the specific instructor course fetch
-      const response = await courseApi.getBySlug(id!); // Slug or ID might work depending on route
+      let response;
+      try {
+        response = await courseApi.getBySlug(id!);
+      } catch (e) {
+        response = await courseApi.getById(id!);
+      }
       setCourse(response.data.data);
     } catch (error) {
       console.error("Error loading course:", error);
