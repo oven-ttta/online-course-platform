@@ -315,9 +315,7 @@ class EnrollmentService {
       include: {
         course: {
           include: {
-            lessons: {
-              where: { isPublished: true },
-            },
+            lessons: true,
           },
         },
         lessonProgress: {
@@ -330,7 +328,13 @@ class EnrollmentService {
 
     const totalLessons = enrollment.course.lessons.length;
     const completedLessons = enrollment.lessonProgress.length;
-    const progressPercent = totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0;
+    const progressPercent =
+      totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0;
+
+    console.log(`[Progress Update] Enrollment: ${enrollmentId}`);
+    console.log(`Total Lessons (Published): ${totalLessons}`);
+    console.log(`Completed Lessons: ${completedLessons}`);
+    console.log(`Progress Percent: ${progressPercent}%`);
 
     await prisma.enrollment.update({
       where: { id: enrollmentId },

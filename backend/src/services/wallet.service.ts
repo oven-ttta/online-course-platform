@@ -3,32 +3,6 @@ import { TransactionType, TransactionStatus } from '@prisma/client';
 import redeemvouchers from "@prakrit_m/tmn-voucher";
 
 class WalletService {
-    async deposit(userId: string, amount: number, provider: string = 'DEMO') {
-        return prisma.$transaction(async (tx) => {
-            const transaction = await tx.walletTransaction.create({
-                data: {
-                    userId,
-                    amount,
-                    type: TransactionType.DEPOSIT,
-                    status: TransactionStatus.SUCCESS,
-                    provider,
-                    description: `เติมเงินจำนวน ${amount} บาท`,
-                    referenceId: `DEP-${Date.now()}`,
-                },
-            });
-
-            await tx.user.update({
-                where: { id: userId },
-                data: {
-                    balance: {
-                        increment: amount,
-                    },
-                },
-            });
-
-            return transaction;
-        });
-    }
 
     async getBalance(userId: string) {
         const user = await prisma.user.findUnique({

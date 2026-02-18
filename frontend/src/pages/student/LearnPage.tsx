@@ -142,6 +142,25 @@ export default function LearnPage() {
             <h2 className="font-semibold text-gray-900 line-clamp-2">
               {course?.title}
             </h2>
+
+            {/* Progress Bar */}
+            <div className="mt-4">
+              <div className="flex justify-between text-xs font-medium text-gray-500 mb-1">
+                <span>ความคืบหน้า</span>
+                <span>
+                  {Math.round(Number(course?.enrollment?.progressPercent || 0))}
+                  %
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-1.5">
+                <div
+                  className="bg-green-500 h-1.5 rounded-full transition-all duration-500"
+                  style={{
+                    width: `${course?.enrollment?.progressPercent || 0}%`,
+                  }}
+                ></div>
+              </div>
+            </div>
           </div>
 
           {/* Lessons List */}

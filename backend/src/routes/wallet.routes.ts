@@ -7,7 +7,6 @@ const router = Router();
 router.use(authenticate);
 
 router.get('/balance', walletController.getBalance);
-router.post('/deposit', walletController.deposit);
 router.get('/transactions', walletController.getTransactions);
 router.post('/purchase/:courseId', walletController.purchaseCourse);
 router.post('/redeem', walletController.redeemVoucher);

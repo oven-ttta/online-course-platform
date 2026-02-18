@@ -12,19 +12,6 @@ export const getBalance = async (req: Request, res: Response, next: NextFunction
     }
 };
 
-export const deposit = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const userId = req.user!.userId;
-        const { amount } = req.body;
-        if (!amount || amount <= 0) {
-            return res.status(400).json({ error: 'Invalid amount' });
-        }
-        const transaction = await walletService.deposit(userId, parseFloat(amount));
-        sendSuccess(res, transaction);
-    } catch (error) {
-        next(error);
-    }
-};
 
 export const getTransactions = async (req: Request, res: Response, next: NextFunction) => {
     try {
