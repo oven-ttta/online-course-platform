@@ -91,6 +91,8 @@ export const courseApi = {
     api.get('/courses/featured', { params: { limit } }),
   getBySlug: (slug: string) =>
     api.get(`/courses/${slug}`),
+  getById: (id: string) =>
+    api.get(`/courses/id/${id}`),
   create: (data: FormData | object) =>
     api.post('/courses', data),
   update: (id: string, data: object) =>

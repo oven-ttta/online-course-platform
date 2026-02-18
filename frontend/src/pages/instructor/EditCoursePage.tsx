@@ -36,13 +36,19 @@ export default function EditCoursePage() {
 
   const loadInitialData = async () => {
     try {
-      const [categoriesRes, courseRes] = await Promise.all([
-        categoryApi.getAll(),
-        courseApi.getBySlug(id!), // Route often accepts ID or Slug as param
-      ]);
-
+      const categoriesRes = await categoryApi.getAll();
       setCategories(categoriesRes.data.data);
-      const course = courseRes.data.data;
+
+      let course;
+      try {
+        // Try getting by slug first
+        const courseRes = await courseApi.getBySlug(id!);
+        course = courseRes.data.data;
+      } catch (e) {
+        // If not found, it's likely a UUID
+        const courseRes = await courseApi.getById(id!);
+        course = courseRes.data.data;
+      }
 
       // Populate form
       setValue("title", course.title);

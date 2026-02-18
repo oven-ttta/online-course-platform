@@ -26,6 +26,7 @@ const createReviewValidation = [
 // Public routes
 router.get('/', courseController.getAllCourses);
 router.get('/featured', courseController.getFeaturedCourses);
+router.get('/id/:id', courseController.getCourseById);
 router.get('/:slug', optionalAuth, courseController.getCourseBySlug);
 router.get('/:courseId/reviews', reviewController.getCourseReviews);
 
