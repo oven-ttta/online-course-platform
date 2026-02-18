@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { wishlistApi } from "../services/api";
 import CourseCard from "../components/features/CourseCard";
-import { Course } from "../types";
 
 export default function WishlistPage() {
   const [items, setItems] = useState<any[]>([]);

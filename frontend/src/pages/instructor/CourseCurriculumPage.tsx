@@ -1,12 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
-import {
-  PlusIcon,
-  PencilIcon,
-  TrashIcon,
-  ChevronDownIcon,
-  ChevronUpIcon,
-} from "@heroicons/react/24/outline";
+import { PlusIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { courseApi, lessonApi } from "../../services/api";
 import toast from "react-hot-toast";
 
@@ -15,7 +9,6 @@ export default function CourseCurriculumPage() {
   const [course, setCourse] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isSectionModalOpen, setIsSectionModalOpen] = useState(false);
-  const [editingSection, setEditingSection] = useState<any>(null);
   const [sectionTitle, setSectionTitle] = useState("");
 
   useEffect(() => {
