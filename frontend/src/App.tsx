@@ -17,6 +17,7 @@ import LearnPage from "./pages/student/LearnPage";
 import InstructorDashboard from "./pages/instructor/InstructorDashboard";
 import InstructorCoursesPage from "./pages/instructor/InstructorCoursesPage";
 import CreateCoursePage from "./pages/instructor/CreateCoursePage";
+import EditCoursePage from "./pages/instructor/EditCoursePage";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsersPage from "./pages/admin/AdminUsersPage";
 import AdminCoursesPage from "./pages/admin/AdminCoursesPage";
@@ -117,6 +118,7 @@ function App() {
         <Route index element={<InstructorDashboard />} />
         <Route path="courses" element={<InstructorCoursesPage />} />
         <Route path="courses/create" element={<CreateCoursePage />} />
+        <Route path="courses/edit/:id" element={<EditCoursePage />} />
         <Route
           path="courses/curriculum/:id"
           element={<CourseCurriculumPage />}
