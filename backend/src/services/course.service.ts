@@ -123,11 +123,11 @@ class CourseService {
       ...(isFeatured !== undefined && { isFeatured }),
       ...(minPrice !== undefined || maxPrice !== undefined
         ? {
-            price: {
-              ...(minPrice !== undefined && { gte: minPrice }),
-              ...(maxPrice !== undefined && { lte: maxPrice }),
-            },
-          }
+          price: {
+            ...(minPrice !== undefined && { gte: minPrice }),
+            ...(maxPrice !== undefined && { lte: maxPrice }),
+          },
+        }
         : {}),
       ...(search && {
         OR: [
@@ -219,6 +219,14 @@ class CourseService {
                 videoDuration: true,
                 isFree: true,
                 isPublished: true,
+                lessonProgress: userId ? {
+                  where: { userId },
+                  select: {
+                    isCompleted: true,
+                    watchTime: true,
+                    lastPosition: true,
+                  }
+                } : false,
               },
             },
           },
@@ -258,7 +266,20 @@ class CourseService {
       isEnrolled = !!enrollment;
     }
 
-    return { ...course, isEnrolled, enrollment };
+    // Map sections and lessons to flatten progress
+    const sections = course.sections.map(section => ({
+      ...section,
+      lessons: section.lessons.map(lesson => {
+        const progress = (lesson as any).lessonProgress?.[0] || null;
+        const { lessonProgress, ...lessonData } = lesson as any;
+        return {
+          ...lessonData,
+          progress
+        };
+      })
+    }));
+
+    return { ...course, sections, isEnrolled, enrollment };
   }
 
   async findById(id: string) {

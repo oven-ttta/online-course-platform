@@ -1,24 +1,29 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   ChevronLeftIcon,
   CheckCircleIcon,
   PlayIcon,
   DocumentTextIcon,
   AcademicCapIcon,
-} from '@heroicons/react/24/solid';
-import ReactPlayer from 'react-player';
-import { courseApi, lessonApi, enrollmentApi } from '../../services/api';
-import { Course, Lesson } from '../../types';
-import toast from 'react-hot-toast';
+} from "@heroicons/react/24/solid";
+import ReactPlayer from "react-player";
+import { courseApi, lessonApi, enrollmentApi } from "../../services/api";
+import { Course, Lesson } from "../../types";
+import toast from "react-hot-toast";
 
 export default function LearnPage() {
-  const { courseSlug, lessonId } = useParams<{ courseSlug: string; lessonId?: string }>();
+  const { courseSlug, lessonId } = useParams<{
+    courseSlug: string;
+    lessonId?: string;
+  }>();
   const navigate = useNavigate();
   const [course, setCourse] = useState<Course | null>(null);
   const [currentLesson, setCurrentLesson] = useState<Lesson | null>(null);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const playerRef = useRef<ReactPlayer>(null);
+  const [hasSeeked, setHasSeeked] = useState(false);
 
   useEffect(() => {
     loadCourse();
@@ -27,6 +32,7 @@ export default function LearnPage() {
   useEffect(() => {
     if (lessonId) {
       loadLesson(lessonId);
+      setHasSeeked(false);
     }
   }, [lessonId]);
 
@@ -42,8 +48,8 @@ export default function LearnPage() {
         navigate(`/learn/${courseSlug}/${firstLesson.id}`, { replace: true });
       }
     } catch (error) {
-      console.error('Error loading course:', error);
-      navigate('/dashboard/my-courses');
+      console.error("Error loading course:", error);
+      navigate("/dashboard/my-courses");
     } finally {
       setLoading(false);
     }
@@ -54,7 +60,7 @@ export default function LearnPage() {
       const response = await lessonApi.getLesson(id);
       setCurrentLesson(response.data.data);
     } catch (error) {
-      console.error('Error loading lesson:', error);
+      console.error("Error loading lesson:", error);
     }
   };
 
@@ -62,8 +68,13 @@ export default function LearnPage() {
     if (!currentLesson) return;
 
     try {
-      await enrollmentApi.updateProgress(currentLesson.id, { isCompleted: true });
-      toast.success('บทเรียนเสร็จสมบูรณ์!');
+      await enrollmentApi.updateProgress(currentLesson.id, {
+        isCompleted: true,
+      });
+      toast.success("บทเรียนเสร็จสมบูรณ์!");
+
+      // Refresh course data to update sidebar icons and progress
+      await loadCourse();
 
       // Find next lesson
       if (course?.sections) {
@@ -81,7 +92,24 @@ export default function LearnPage() {
         }
       }
     } catch (error) {
-      console.error('Error updating progress:', error);
+      console.error("Error updating progress:", error);
+    }
+  };
+
+  const handleVideoProgress = async (state: { playedSeconds: number }) => {
+    if (!currentLesson || currentLesson.type !== "VIDEO") return;
+
+    // Save progress if watched more than 5 seconds and it's multiple of 10
+    const seconds = Math.floor(state.playedSeconds);
+    if (seconds > 0 && seconds % 10 === 0) {
+      try {
+        await enrollmentApi.updateProgress(currentLesson.id, {
+          lastPosition: seconds,
+          watchTime: seconds,
+        });
+      } catch (e) {
+        // Silent error for background progress
+      }
     }
   };
 
@@ -98,14 +126,14 @@ export default function LearnPage() {
       {/* Sidebar */}
       <aside
         className={`${
-          sidebarOpen ? 'w-80' : 'w-0'
+          sidebarOpen ? "w-80" : "w-0"
         } bg-white flex-shrink-0 overflow-hidden transition-all duration-300`}
       >
         <div className="h-full flex flex-col">
           {/* Header */}
           <div className="p-4 border-b">
             <button
-              onClick={() => navigate('/dashboard/my-courses')}
+              onClick={() => navigate("/dashboard/my-courses")}
               className="flex items-center text-gray-600 hover:text-gray-900 mb-2"
             >
               <ChevronLeftIcon className="h-5 w-5 mr-1" />
@@ -127,17 +155,19 @@ export default function LearnPage() {
                   {section.lessons.map((lesson, lessonIndex) => (
                     <li key={lesson.id}>
                       <button
-                        onClick={() => navigate(`/learn/${courseSlug}/${lesson.id}`)}
+                        onClick={() =>
+                          navigate(`/learn/${courseSlug}/${lesson.id}`)
+                        }
                         className={`w-full flex items-center px-4 py-3 text-left hover:bg-gray-50 ${
-                          currentLesson?.id === lesson.id ? 'bg-primary-50' : ''
+                          currentLesson?.id === lesson.id ? "bg-primary-50" : ""
                         }`}
                       >
                         <span className="flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center mr-3">
                           {lesson.progress?.isCompleted ? (
                             <CheckCircleIcon className="h-6 w-6 text-green-500" />
-                          ) : lesson.type === 'VIDEO' ? (
+                          ) : lesson.type === "VIDEO" ? (
                             <PlayIcon className="h-3 w-3 text-gray-400" />
-                          ) : lesson.type === 'QUIZ' ? (
+                          ) : lesson.type === "QUIZ" ? (
                             <AcademicCapIcon className="h-3 w-3 text-gray-400" />
                           ) : (
                             <DocumentTextIcon className="h-3 w-3 text-gray-400" />
@@ -164,33 +194,47 @@ export default function LearnPage() {
           className="absolute top-4 left-4 z-10 p-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700"
         >
           <ChevronLeftIcon
-            className={`h-5 w-5 transition-transform ${sidebarOpen ? '' : 'rotate-180'}`}
+            className={`h-5 w-5 transition-transform ${sidebarOpen ? "" : "rotate-180"}`}
           />
         </button>
 
         {/* Video/Content Area */}
         <div className="flex-1 flex flex-col">
-          {currentLesson?.type === 'VIDEO' && currentLesson.videoUrl ? (
+          {currentLesson?.type === "VIDEO" && currentLesson.videoUrl ? (
             <div className="aspect-video bg-black">
               <ReactPlayer
+                ref={playerRef}
                 url={currentLesson.videoUrl}
                 width="100%"
                 height="100%"
                 controls
                 onEnded={handleLessonComplete}
+                onProgress={handleVideoProgress}
+                onReady={() => {
+                  if (!hasSeeked && currentLesson?.progress?.lastPosition) {
+                    playerRef.current?.seekTo(
+                      currentLesson.progress.lastPosition,
+                    );
+                    setHasSeeked(true);
+                  }
+                }}
               />
             </div>
-          ) : currentLesson?.type === 'TEXT' ? (
+          ) : currentLesson?.type === "TEXT" ? (
             <div className="flex-1 bg-white p-8 overflow-y-auto">
               <div className="max-w-3xl mx-auto prose">
                 <h1>{currentLesson.title}</h1>
-                <div className="whitespace-pre-line">{currentLesson.content}</div>
+                <div className="whitespace-pre-line">
+                  {currentLesson.content}
+                </div>
               </div>
             </div>
-          ) : currentLesson?.type === 'QUIZ' ? (
+          ) : currentLesson?.type === "QUIZ" ? (
             <div className="flex-1 bg-white p-8 overflow-y-auto">
               <div className="max-w-3xl mx-auto">
-                <h1 className="text-2xl font-bold mb-4">{currentLesson.title}</h1>
+                <h1 className="text-2xl font-bold mb-4">
+                  {currentLesson.title}
+                </h1>
                 <p className="text-gray-600 mb-6">แบบทดสอบสำหรับบทเรียนนี้</p>
                 {currentLesson.quiz && (
                   <div className="space-y-6">
@@ -205,7 +249,11 @@ export default function LearnPage() {
                               key={optIndex}
                               className="flex items-center p-3 bg-white rounded border cursor-pointer hover:border-primary-500"
                             >
-                              <input type="radio" name={`q-${q.id}`} className="mr-3" />
+                              <input
+                                type="radio"
+                                name={`q-${q.id}`}
+                                className="mr-3"
+                              />
                               {option}
                             </label>
                           ))}

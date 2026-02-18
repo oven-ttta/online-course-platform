@@ -13,6 +13,7 @@ export interface User {
   phone?: string;
   bio?: string;
   isVerified: boolean;
+  balance?: number;
   createdAt: string;
 }
 

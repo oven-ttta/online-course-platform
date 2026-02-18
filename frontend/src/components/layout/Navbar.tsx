@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Menu, Transition } from '@headlessui/react';
-import { Fragment } from 'react';
+import { useState } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Menu, Transition } from "@headlessui/react";
+import { Fragment } from "react";
 import {
   Bars3Icon,
   XMarkIcon,
@@ -10,17 +10,37 @@ import {
   ArrowRightOnRectangleIcon,
   Cog6ToothIcon,
   BookOpenIcon,
-} from '@heroicons/react/24/outline';
-import { useAuth } from '../../contexts/AuthContext';
+} from "@heroicons/react/24/outline";
+import { useAuth } from "../../contexts/AuthContext";
+import { walletApi } from "../../services/api";
+import { useEffect, useState as useReactState } from "react";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, isAuthenticated, logout, hasRole } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const [balance, setBalance] = useReactState<number | null>(null);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadBalance();
+    }
+  }, [isAuthenticated, location.pathname]); // Update balance on navigation
+
+  const loadBalance = async () => {
+    try {
+      const res = await walletApi.getBalance();
+      setBalance(Number(res.data.data.balance));
+    } catch (e) {
+      console.error("Error fetching balance");
+    }
+  };
 
   const handleLogout = async () => {
     await logout();
-    navigate('/');
+    navigate("/");
   };
 
   return (
@@ -42,7 +62,7 @@ export default function Navbar() {
               >
                 คอร์สเรียน
               </Link>
-              {hasRole('INSTRUCTOR') && (
+              {hasRole("INSTRUCTOR") && (
                 <Link
                   to="/instructor"
                   className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium"
@@ -50,7 +70,7 @@ export default function Navbar() {
                   ผู้สอน
                 </Link>
               )}
-              {hasRole('ADMIN') && (
+              {hasRole("ADMIN") && (
                 <Link
                   to="/admin"
                   className="text-gray-600 hover:text-gray-900 px-3 py-2 text-sm font-medium"
@@ -62,7 +82,16 @@ export default function Navbar() {
           </div>
 
           {/* Right side */}
-          <div className="flex items-center">
+          <div className="flex items-center space-x-4">
+            {isAuthenticated && (
+              <Link
+                to="/dashboard/wallet"
+                className="hidden sm:flex items-center px-3 py-1.5 bg-primary-50 text-primary-700 rounded-full text-sm font-bold border border-primary-100 hover:bg-primary-100 transition-colors"
+              >
+                <span className="mr-1">฿</span>
+                {balance !== null ? balance.toLocaleString() : "..."}
+              </Link>
+            )}
             {isAuthenticated ? (
               <Menu as="div" className="relative ml-3">
                 <Menu.Button className="flex items-center space-x-2 text-gray-600 hover:text-gray-900">
@@ -96,7 +125,7 @@ export default function Navbar() {
                           <Link
                             to="/dashboard"
                             className={`${
-                              active ? 'bg-gray-100' : ''
+                              active ? "bg-gray-100" : ""
                             } flex items-center px-4 py-2 text-sm text-gray-700`}
                           >
                             <BookOpenIcon className="h-5 w-5 mr-2" />
@@ -109,7 +138,7 @@ export default function Navbar() {
                           <Link
                             to="/dashboard/my-courses"
                             className={`${
-                              active ? 'bg-gray-100' : ''
+                              active ? "bg-gray-100" : ""
                             } flex items-center px-4 py-2 text-sm text-gray-700`}
                           >
                             <AcademicCapIcon className="h-5 w-5 mr-2" />
@@ -122,7 +151,7 @@ export default function Navbar() {
                           <Link
                             to="/settings"
                             className={`${
-                              active ? 'bg-gray-100' : ''
+                              active ? "bg-gray-100" : ""
                             } flex items-center px-4 py-2 text-sm text-gray-700`}
                           >
                             <Cog6ToothIcon className="h-5 w-5 mr-2" />
@@ -136,7 +165,7 @@ export default function Navbar() {
                           <button
                             onClick={handleLogout}
                             className={`${
-                              active ? 'bg-gray-100' : ''
+                              active ? "bg-gray-100" : ""
                             } flex items-center w-full px-4 py-2 text-sm text-red-600`}
                           >
                             <ArrowRightOnRectangleIcon className="h-5 w-5 mr-2" />
@@ -156,10 +185,7 @@ export default function Navbar() {
                 >
                   เข้าสู่ระบบ
                 </Link>
-                <Link
-                  to="/register"
-                  className="btn btn-primary text-sm"
-                >
+                <Link to="/register" className="btn btn-primary text-sm">
                   สมัครสมาชิก
                 </Link>
               </div>

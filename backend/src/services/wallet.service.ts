@@ -3,10 +3,7 @@ import { TransactionType, TransactionStatus } from '@prisma/client';
 
 class WalletService {
     async deposit(userId: string, amount: number, provider: string = 'DEMO') {
-        // In a real app, this would integrate with a payment gateway.
-        // Here we simulate a successful deposit.
         return prisma.$transaction(async (tx) => {
-            // Create transaction record
             const transaction = await tx.walletTransaction.create({
                 data: {
                     userId,
@@ -19,7 +16,6 @@ class WalletService {
                 },
             });
 
-            // Update user balance
             await tx.user.update({
                 where: { id: userId },
                 data: {
@@ -38,7 +34,7 @@ class WalletService {
             where: { id: userId },
             select: { balance: true },
         });
-        return user?.balance || 0;
+        return Number(user?.balance || 0);
     }
 
     async getTransactions(userId: string) {
@@ -69,17 +65,13 @@ class WalletService {
                 throw { statusCode: 400, code: 'INSUFFICIENT_BALANCE', message: 'ยอดเงินไม่เพียงพอ' };
             }
 
-            // Deduct balance
             await tx.user.update({
                 where: { id: userId },
                 data: {
-                    balance: {
-                        decrement: price,
-                    },
+                    balance: Number(user.balance) - price
                 },
             });
 
-            // Create purchase transaction
             const transaction = await tx.walletTransaction.create({
                 data: {
                     userId,
@@ -91,7 +83,6 @@ class WalletService {
                 },
             });
 
-            // Create Payment record (to be compatible with existing logic)
             const payment = await tx.payment.create({
                 data: {
                     userId,
