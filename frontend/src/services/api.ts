@@ -113,6 +113,12 @@ export const categoryApi = {
     api.get('/categories'),
   getBySlug: (slug: string) =>
     api.get(`/categories/${slug}`),
+  create: (data: { name: string; slug: string; description?: string; parentId?: number }) =>
+    api.post('/categories', data),
+  update: (id: number, data: { name?: string; slug?: string; description?: string; isActive?: boolean }) =>
+    api.put(`/categories/${id}`, data),
+  delete: (id: number) =>
+    api.delete(`/categories/${id}`),
 };
 
 // Enrollment API
@@ -212,6 +218,28 @@ export const uploadApi = {
     api.post('/upload/presigned-url', { fileName, folder }),
   deleteFile: (fileName: string) =>
     api.delete('/upload', { data: { fileName } }),
+};
+
+// Wishlist API
+export const wishlistApi = {
+  getMyWishlist: () => api.get('/wishlist'),
+  add: (courseId: string) => api.post('/wishlist', { courseId }),
+  remove: (courseId: string) => api.delete(`/wishlist/${courseId}`),
+};
+
+// Contact API
+export const contactApi = {
+  submit: (data: { name: string; email: string; subject: string; message: string }) =>
+    api.post('/contact', data),
+  getContacts: () => api.get('/contact'),
+  markAsRead: (id: string) => api.put(`/contact/${id}/read`),
+};
+
+// User API (Shared with Admin)
+export const userApi = {
+  getProfile: (id: string) => api.get(`/users/${id}/profile`),
+  updateProfile: (data: { firstName?: string; lastName?: string; phone?: string; bio?: string; avatarUrl?: string }) =>
+    api.put('/users/profile', data),
 };
 
 // Admin API

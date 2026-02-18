@@ -1,25 +1,32 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { useAuth } from './contexts/AuthContext';
+import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "./contexts/AuthContext";
 
 // Layout
-import MainLayout from './components/layout/MainLayout';
-import DashboardLayout from './components/layout/DashboardLayout';
+import MainLayout from "./components/layout/MainLayout";
+import DashboardLayout from "./components/layout/DashboardLayout";
 
 // Pages
-import HomePage from './pages/HomePage';
-import CoursesPage from './pages/CoursesPage';
-import CourseDetailPage from './pages/CourseDetailPage';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import StudentDashboard from './pages/student/StudentDashboard';
-import MyCoursesPage from './pages/student/MyCoursesPage';
-import LearnPage from './pages/student/LearnPage';
-import InstructorDashboard from './pages/instructor/InstructorDashboard';
-import InstructorCoursesPage from './pages/instructor/InstructorCoursesPage';
-import CreateCoursePage from './pages/instructor/CreateCoursePage';
-import AdminDashboard from './pages/admin/AdminDashboard';
-import AdminUsersPage from './pages/admin/AdminUsersPage';
-import AdminCoursesPage from './pages/admin/AdminCoursesPage';
+import HomePage from "./pages/HomePage";
+import CoursesPage from "./pages/CoursesPage";
+import CourseDetailPage from "./pages/CourseDetailPage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import StudentDashboard from "./pages/student/StudentDashboard";
+import MyCoursesPage from "./pages/student/MyCoursesPage";
+import LearnPage from "./pages/student/LearnPage";
+import InstructorDashboard from "./pages/instructor/InstructorDashboard";
+import InstructorCoursesPage from "./pages/instructor/InstructorCoursesPage";
+import CreateCoursePage from "./pages/instructor/CreateCoursePage";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsersPage from "./pages/admin/AdminUsersPage";
+import AdminCoursesPage from "./pages/admin/AdminCoursesPage";
+import AdminCategoriesPage from "./pages/admin/AdminCategoriesPage";
+import WishlistPage from "./pages/WishlistPage";
+import ProfilePage from "./pages/ProfilePage";
+import CourseCurriculumPage from "./pages/instructor/CourseCurriculumPage";
+import AdminReportsPage from "./pages/admin/AdminReportsPage";
+import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
+import InstructorEarningsPage from "./pages/instructor/InstructorEarningsPage";
 
 // Loading component
 function LoadingScreen() {
@@ -31,7 +38,13 @@ function LoadingScreen() {
 }
 
 // Protected Route wrapper
-function ProtectedRoute({ children, roles }: { children: React.ReactNode; roles?: string[] }) {
+function ProtectedRoute({
+  children,
+  roles,
+}: {
+  children: React.ReactNode;
+  roles?: string[];
+}) {
   const { user, isLoading, isAuthenticated } = useAuth();
 
   if (isLoading) {
@@ -71,13 +84,15 @@ function App() {
       <Route
         path="/dashboard"
         element={
-          <ProtectedRoute roles={['STUDENT', 'INSTRUCTOR', 'ADMIN']}>
+          <ProtectedRoute roles={["STUDENT", "INSTRUCTOR", "ADMIN"]}>
             <DashboardLayout />
           </ProtectedRoute>
         }
       >
         <Route index element={<StudentDashboard />} />
         <Route path="my-courses" element={<MyCoursesPage />} />
+        <Route path="wishlist" element={<WishlistPage />} />
+        <Route path="profile" element={<ProfilePage />} />
       </Route>
 
       {/* Learning Route */}
@@ -94,7 +109,7 @@ function App() {
       <Route
         path="/instructor"
         element={
-          <ProtectedRoute roles={['INSTRUCTOR', 'ADMIN']}>
+          <ProtectedRoute roles={["INSTRUCTOR", "ADMIN"]}>
             <DashboardLayout />
           </ProtectedRoute>
         }
@@ -102,13 +117,18 @@ function App() {
         <Route index element={<InstructorDashboard />} />
         <Route path="courses" element={<InstructorCoursesPage />} />
         <Route path="courses/create" element={<CreateCoursePage />} />
+        <Route
+          path="courses/curriculum/:id"
+          element={<CourseCurriculumPage />}
+        />
+        <Route path="earnings" element={<InstructorEarningsPage />} />
       </Route>
 
       {/* Admin Routes */}
       <Route
         path="/admin"
         element={
-          <ProtectedRoute roles={['ADMIN']}>
+          <ProtectedRoute roles={["ADMIN"]}>
             <DashboardLayout />
           </ProtectedRoute>
         }
@@ -116,6 +136,9 @@ function App() {
         <Route index element={<AdminDashboard />} />
         <Route path="users" element={<AdminUsersPage />} />
         <Route path="courses" element={<AdminCoursesPage />} />
+        <Route path="categories" element={<AdminCategoriesPage />} />
+        <Route path="reports" element={<AdminReportsPage />} />
+        <Route path="settings" element={<AdminSettingsPage />} />
       </Route>
 
       {/* 404 */}

@@ -5,6 +5,39 @@ import { authenticate, authorize } from '../middleware/auth.middleware';
 
 const router = Router();
 
+// Update my profile
+router.put('/profile', authenticate, async (req, res, next) => {
+  try {
+    const userId = req.user!.userId;
+    const { firstName, lastName, bio, avatarUrl, phone } = req.body;
+
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        firstName,
+        lastName,
+        bio,
+        avatarUrl,
+        phone,
+      },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        avatarUrl: true,
+        bio: true,
+        phone: true,
+        role: true,
+      },
+    });
+
+    sendSuccess(res, user);
+  } catch (error) {
+    next(error);
+  }
+});
+
 // Get user profile (public)
 router.get('/:id/profile', async (req, res, next) => {
   try {

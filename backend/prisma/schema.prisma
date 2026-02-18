@@ -73,6 +73,7 @@ model User {
   lessonProgress  LessonProgress[]
   quizAttempts    QuizAttempt[]
   refreshTokens   RefreshToken[]
+  wishlist        Wishlist[]
 
   @@map("users")
 }
@@ -90,6 +91,49 @@ model RefreshToken {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("refresh_tokens")
+}
+
+model Wishlist {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  courseId  String   @map("course_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+  @@map("wishlists")
+}
+
+model Contact {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  subject   String
+  message   String
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("contacts")
+}
+
+model Coupon {
+  id            String    @id @default(uuid())
+  code          String    @unique
+  description   String?
+  discountType  String    @map("discount_type") // PERCENTAGE or FIXED
+  discountValue Decimal   @map("discount_value") @db.Decimal(10, 2)
+  minAmount     Decimal?  @map("min_amount") @db.Decimal(10, 2)
+  maxDiscount   Decimal?  @map("max_discount") @db.Decimal(10, 2)
+  startDate     DateTime  @map("start_date")
+  endDate       DateTime  @map("end_date")
+  usageLimit    Int?      @map("usage_limit")
+  usedCount     Int       @default(0) @map("used_count")
+  isActive      Boolean   @default(true) @map("is_active")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  @@map("coupons")
 }
 
 model Category {
@@ -144,6 +188,7 @@ model Course {
   payments         Payment[]
   reviews          Review[]
   statistics       CourseStatistics?
+  wishlist         Wishlist[]
 
   @@index([instructorId])
   @@index([categoryId])

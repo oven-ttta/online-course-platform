@@ -17,6 +17,8 @@ import reviewRoutes from './routes/review.routes';
 import adminRoutes from './routes/admin.routes';
 import instructorRoutes from './routes/instructor.routes';
 import uploadRoutes from './routes/upload.routes';
+import wishlistRoutes from './routes/wishlist.routes';
+import contactRoutes from './routes/contact.routes';
 
 // Import middleware
 import { errorHandler } from './middleware/error.middleware';
@@ -69,6 +71,8 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/instructor', instructorRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/wishlist', wishlistRoutes);
+app.use('/api/contact', contactRoutes);
 
 // Error handler
 app.use(errorHandler);

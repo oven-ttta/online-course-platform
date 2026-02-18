@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { useState } from "react";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import {
   HomeIcon,
   BookOpenIcon,
@@ -12,9 +12,9 @@ import {
   XMarkIcon,
   PlusIcon,
   ClipboardDocumentListIcon,
-} from '@heroicons/react/24/outline';
-import { useAuth } from '../../contexts/AuthContext';
-import Navbar from './Navbar';
+} from "@heroicons/react/24/outline";
+import { useAuth } from "../../contexts/AuthContext";
+import Navbar from "./Navbar";
 
 interface NavItem {
   name: string;
@@ -23,23 +23,35 @@ interface NavItem {
 }
 
 const studentNavigation: NavItem[] = [
-  { name: 'แดชบอร์ด', href: '/dashboard', icon: HomeIcon },
-  { name: 'คอร์สของฉัน', href: '/dashboard/my-courses', icon: BookOpenIcon },
+  { name: "แดชบอร์ด", href: "/dashboard", icon: HomeIcon },
+  { name: "คอร์สของฉัน", href: "/dashboard/my-courses", icon: BookOpenIcon },
+  {
+    name: "รายการที่บันทึก",
+    href: "/dashboard/wishlist",
+    icon: AcademicCapIcon,
+  },
+  { name: "ตั้งค่าโปรไฟล์", href: "/dashboard/profile", icon: Cog6ToothIcon },
 ];
 
 const instructorNavigation: NavItem[] = [
-  { name: 'แดชบอร์ด', href: '/instructor', icon: HomeIcon },
-  { name: 'คอร์สของฉัน', href: '/instructor/courses', icon: AcademicCapIcon },
-  { name: 'สร้างคอร์ส', href: '/instructor/courses/create', icon: PlusIcon },
-  { name: 'รายได้', href: '/instructor/earnings', icon: CurrencyDollarIcon },
+  { name: "แดชบอร์ด", href: "/instructor", icon: HomeIcon },
+  { name: "คอร์สของฉัน", href: "/instructor/courses", icon: AcademicCapIcon },
+  { name: "สร้างคอร์ส", href: "/instructor/courses/create", icon: PlusIcon },
+  { name: "รายได้", href: "/instructor/earnings", icon: CurrencyDollarIcon },
+  { name: "ตั้งค่าโปรไฟล์", href: "/dashboard/profile", icon: Cog6ToothIcon },
 ];
 
 const adminNavigation: NavItem[] = [
-  { name: 'แดชบอร์ด', href: '/admin', icon: HomeIcon },
-  { name: 'จัดการผู้ใช้', href: '/admin/users', icon: UsersIcon },
-  { name: 'จัดการคอร์ส', href: '/admin/courses', icon: ClipboardDocumentListIcon },
-  { name: 'รายงาน', href: '/admin/reports', icon: ChartBarIcon },
-  { name: 'ตั้งค่า', href: '/admin/settings', icon: Cog6ToothIcon },
+  { name: "แดชบอร์ด", href: "/admin", icon: HomeIcon },
+  { name: "จัดการผู้ใช้", href: "/admin/users", icon: UsersIcon },
+  {
+    name: "จัดการคอร์ส",
+    href: "/admin/courses",
+    icon: ClipboardDocumentListIcon,
+  },
+  { name: "หมวดหมู่", href: "/admin/categories", icon: AcademicCapIcon },
+  { name: "รายงาน", href: "/admin/reports", icon: ChartBarIcon },
+  { name: "ตั้งค่าระบบ", href: "/admin/settings", icon: Cog6ToothIcon },
 ];
 
 export default function DashboardLayout() {
@@ -49,14 +61,14 @@ export default function DashboardLayout() {
 
   // Determine navigation based on current path
   let navigation: NavItem[] = studentNavigation;
-  if (location.pathname.startsWith('/instructor')) {
+  if (location.pathname.startsWith("/instructor")) {
     navigation = instructorNavigation;
-  } else if (location.pathname.startsWith('/admin')) {
+  } else if (location.pathname.startsWith("/admin")) {
     navigation = adminNavigation;
   }
 
   const isActive = (href: string) => {
-    if (href === '/dashboard' || href === '/instructor' || href === '/admin') {
+    if (href === "/dashboard" || href === "/instructor" || href === "/admin") {
       return location.pathname === href;
     }
     return location.pathname.startsWith(href);
@@ -81,7 +93,7 @@ export default function DashboardLayout() {
             fixed lg:static inset-y-0 left-0 z-50
             w-64 bg-white shadow-lg transform transition-transform duration-200
             lg:transform-none lg:translate-x-0
-            ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+            ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
           `}
         >
           <div className="h-full flex flex-col pt-20 lg:pt-5">
@@ -108,11 +120,11 @@ export default function DashboardLayout() {
                     {user?.firstName} {user?.lastName}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {user?.role === 'ADMIN'
-                      ? 'ผู้ดูแลระบบ'
-                      : user?.role === 'INSTRUCTOR'
-                      ? 'ผู้สอน'
-                      : 'นักเรียน'}
+                    {user?.role === "ADMIN"
+                      ? "ผู้ดูแลระบบ"
+                      : user?.role === "INSTRUCTOR"
+                        ? "ผู้สอน"
+                        : "นักเรียน"}
                   </p>
                 </div>
               </div>
@@ -130,8 +142,8 @@ export default function DashboardLayout() {
                     transition-colors duration-200
                     ${
                       isActive(item.href)
-                        ? 'bg-primary-50 text-primary-700'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                        ? "bg-primary-50 text-primary-700"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                     }
                   `}
                 >
