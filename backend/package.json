@@ -4,16 +4,16 @@
   "description": "Backend API for Online Course Platform",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio",
-    "seed": "tsx prisma/seed.ts"
+    "dev": "bun --watch src/index.ts",
+    "build": "bun x tsc",
+    "start": "bun run src/index.ts",
+    "prisma:generate": "bun x prisma generate",
+    "prisma:migrate": "bun x prisma migrate dev",
+    "prisma:studio": "bun x prisma studio",
+    "seed": "bun prisma/seed.ts"
   },
   "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "seed": "bun prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.7.0",

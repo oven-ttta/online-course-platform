@@ -4,10 +4,10 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "lint": "eslint . --ext ts,tsx"
+    "dev": "bun x vite",
+    "build": "bun x tsc && bun x vite build",
+    "preview": "bun x vite preview",
+    "lint": "bun x eslint . --ext ts,tsx"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.17",

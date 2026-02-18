@@ -44,11 +44,11 @@ cd online-course-platform
 
 # ติดตั้ง Backend Dependencies
 cd backend
-npm install
+bun install
 
 # ติดตั้ง Frontend Dependencies
 cd ../frontend
-npm install
+bun install
 ```
 
 ### ขั้นตอนที่ 2: ตั้งค่า Database
@@ -91,10 +91,10 @@ PORT=3000
 cd backend
 
 # สร้าง Database Tables
-npx prisma migrate dev --name init
+bun x prisma migrate dev --name init
 
 # สร้างข้อมูลเริ่มต้น (Seed)
-npx prisma db seed
+bun run seed
 ```
 
 ### ขั้นตอนที่ 5: รันระบบ
@@ -102,13 +102,13 @@ npx prisma db seed
 #### Terminal 1 - Backend
 ```bash
 cd backend
-npm run dev
+bun run dev
 ```
 
 #### Terminal 2 - Frontend
 ```bash
 cd frontend
-npm run dev
+bun run dev
 ```
 
 ### ขั้นตอนที่ 6: เปิดใช้งาน
@@ -223,32 +223,32 @@ online-course-platform/
 ### Backend
 ```bash
 # รัน Development Server
-npm run dev
+bun run dev
 
 # Build Production
-npm run build
+bun run build
 
 # รัน Production
-npm start
+bun run start
 
 # Prisma Commands
-npx prisma studio          # เปิด Database GUI
-npx prisma migrate dev     # รัน Migration
-npx prisma db push         # Push Schema ไป DB
-npx prisma generate        # Generate Prisma Client
-npx prisma db seed         # รัน Seed Data
+bun x prisma studio          # เปิด Database GUI
+bun x prisma migrate dev     # รัน Migration
+bun x prisma db push         # Push Schema ไป DB
+bun x prisma generate        # Generate Prisma Client
+bun run seed                 # รัน Seed Data
 ```
 
 ### Frontend
 ```bash
 # รัน Development Server
-npm run dev
+bun run dev
 
 # Build Production
-npm run build
+bun run build
 
 # Preview Production Build
-npm run preview
+bun run preview
 ```
 
 ### Docker

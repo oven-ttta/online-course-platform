@@ -35,7 +35,7 @@ docker-compose logs --tail=50
 
 echo ""
 echo "==================================="
-echo "Backend deployed successfully!"
-echo "API URL: http://192.168.1.13:3000"
-echo "Health Check: http://192.168.1.13:3000/health"
+echo "Backend deployed successfully using Bun!"
+echo "API URL: http://192.168.1.71:3000"
+echo "Health Check: http://192.168.1.71:3000/health"
 echo "==================================="
